@@ -22,7 +22,7 @@ pub mod devices {
     }
 
     #[cfg_attr(test, automock)]
-    pub trait AstronomicalDevice<BaseDevice> {
+    pub trait AstronomicalDevice {
         fn new(name: &str, address: &str, baud: u32, timeout_ms: u64) -> Option<Self>
         where
             Self: Sized;
@@ -47,9 +47,9 @@ pub mod devices {
 }
 
 pub mod utils {
-    use crate::devices::{AstronomicalDevice, BaseDevice};
+    use crate::devices::AstronomicalDevice;
 
-    pub fn print_device_table<T: AstronomicalDevice<BaseDevice>>(devices: &Vec<T>) {
+    pub fn print_device_table<T: AstronomicalDevice>(devices: &Vec<T>) {
         for d in devices {
             println!("");
             println!("=======================================");
