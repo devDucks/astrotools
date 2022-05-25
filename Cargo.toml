@@ -1,0 +1,20 @@
+[package]
+name = "astrotools"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serialport = "4.1"
+lightspeed = { git = "https://github.com/devducks/lightspeed", rev = "v0.5.0" }
+
+[dependencies.uuid]
+version = "1.0.0"
+features = [
+    "v4",
+    "fast-rng",
+]
+
+[dev-dependencies]
+mockall = "0.11"
