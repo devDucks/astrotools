@@ -44,11 +44,6 @@ pub mod devices {
         ) -> Result<(), DeviceActions>;
         fn find_property_index(&self, prop_name: &str) -> Option<usize>;
     }
-
-    pub type PowerBoxDevice = BaseDevice;
-    pub type CcdDevice = BaseDevice;
-    pub type MountDevice = BaseDevice;
-    pub type FocuserDevice = BaseDevice;
 }
 
 pub mod utils {
