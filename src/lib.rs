@@ -26,7 +26,7 @@ pub mod devices {
         fn new(name: &str, address: &str, baud: u32, timeout_ms: u64) -> Option<Self>
         where
             Self: Sized;
-        fn send_command<C: 'static>(
+        fn send_command<C: std::fmt::UpperHex>(
             &mut self,
             comm: C,
             val: Option<String>,
