@@ -1,34 +1,29 @@
-pub mod devices {
-    use lightspeed::devices::actions::DeviceActions;
-    use lightspeed::props::Property;
-    use uuid::Uuid;
 
-    pub trait AstronomicalDevice {
-        fn new(name: &str, address: &str, baud: u32, timeout_ms: u64) -> Option<Self>
-        where
-            Self: Sized;
-        fn send_command<C: std::fmt::UpperHex>(
-            &mut self,
-            comm: C,
-            val: Option<String>,
-        ) -> Result<String, DeviceActions>;
-        fn fetch_props(&mut self);
-        fn get_id(&self) -> Uuid;
-        fn get_address(&self) -> &String;
-        fn get_name(&self) -> &String;
-        fn get_properties(&self) -> &Vec<Property>;
-        fn update_property(&mut self, prop_name: &str, val: &str) -> Result<(), DeviceActions>;
-        fn update_property_remote(
-            &mut self,
-            prop_name: &str,
-            val: &str,
-        ) -> Result<(), DeviceActions>;
-        fn find_property_index(&self, prop_name: &str) -> Option<usize>;
-    }
+use lightspeed_astro::devices::actions::DeviceActions;
+use lightspeed_astro::props::Property;
+use uuid::Uuid;
+
+pub trait AstronomicalDevice {
+    fn new(name: &str, address: &str, baud: u32, timeout_ms: u64) -> Option<Self>
+    where
+        Self: Sized;
+    fn send_command<C: std::fmt::UpperHex>(
+        &mut self,
+        comm: C,
+        val: Option<String>,
+    ) -> Result<String, DeviceActions>;
+    fn fetch_props(&mut self);
+    fn get_id(&self) -> Uuid;
+    fn get_address(&self) -> &String;
+    fn get_name(&self) -> &String;
+    fn get_properties(&self) -> &Vec<Property>;
+    fn update_property(&mut self, prop_name: &str, val: &str) -> Result<(), DeviceActions>;
+    fn update_property_remote(&mut self, prop_name: &str, val: &str) -> Result<(), DeviceActions>;
+    fn find_property_index(&self, prop_name: &str) -> Option<usize>;
 }
 
 pub mod utils {
-    use crate::devices::AstronomicalDevice;
+    use crate::AstronomicalDevice;
 
     pub fn print_device_table<T: AstronomicalDevice>(devices: &Vec<T>) {
         for d in devices {
