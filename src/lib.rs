@@ -1,27 +1,8 @@
 pub mod devices {
     pub use lightspeed::devices::actions::DeviceActions;
     use lightspeed::props::Property;
-    #[cfg(test)]
-    use mockall::{automock, predicate::*};
-    #[cfg(windows)]
-    use serialport::COMPort;
-    #[cfg(unix)]
-    use serialport::TTYPort;
     use uuid::Uuid;
 
-    pub struct BaseDevice {
-        pub id: Uuid,
-        pub name: String,
-        pub properties: Vec<Property>,
-        pub address: String,
-        pub baud: u32,
-        #[cfg(unix)]
-        pub port: TTYPort,
-        #[cfg(windows)]
-        pub port: COMPort,
-    }
-
-    #[cfg_attr(test, automock)]
     pub trait AstronomicalDevice {
         fn new(name: &str, address: &str, baud: u32, timeout_ms: u64) -> Option<Self>
         where
