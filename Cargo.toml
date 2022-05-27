@@ -11,7 +11,7 @@ description = "Basic building block for the lightspeed protocol and lightspeed c
 
 [dependencies]
 serialport = "4.1"
-lightspeed = { git = "https://github.com/devducks/lightspeed", rev = "v0.6.1" }
+lightspeed = { version = "0.6.1", git = "https://github.com/devducks/lightspeed", rev = "v0.6.1" }
 
 [dependencies.uuid]
 version = "1.0.0"
