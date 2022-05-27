@@ -1,6 +1,6 @@
 pub mod devices {
-    pub use lightspeed::devices::actions::DeviceActions;
-    pub use lightspeed::props::Property;
+    use lightspeed::devices::actions::DeviceActions;
+    use lightspeed::props::Property;
     use uuid::Uuid;
 
     pub trait AstronomicalDevice {
