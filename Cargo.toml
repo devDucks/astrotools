@@ -1,6 +1,6 @@
 [package]
 name = "astrotools"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2021"
 license = "GPL-3.0-or-later"
 repository = "https://github.com/devDucks/astrotools/"
@@ -9,7 +9,7 @@ description = "Basic building block for the lightspeed protocol and lightspeed c
 
 [dependencies]
 serialport = "4.1"
-lightspeed-astro = "0.6.2"
+lightspeed-astro = "0.6"
 
 [dependencies.uuid]
 version = "1.0.0"
