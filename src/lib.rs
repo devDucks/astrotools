@@ -6,7 +6,6 @@ use lightspeed_astro::devices::actions::DeviceActions;
 use lightspeed_astro::props::Property;
 use uuid::Uuid;
 
-
 pub trait AstroSerialDevice {
     /// Main and only entrypoint to create a new serial device.
     ///
@@ -63,7 +62,29 @@ pub trait AstroSerialDevice {
 
 /// Module that gathers all functions that may help debugging or working woth devices.
 pub mod utils {
+    use std::net::{SocketAddr, TcpListener};
+
     use crate::AstroSerialDevice;
+
+    /// Private method that checks if a given port is free or used.
+    fn port_is_available(host: &str, port: u16) -> bool {
+        match TcpListener::bind((host, port)) {
+            Ok(_) => true,
+            Err(_) => false,
+        }
+    }
+
+    /// Build a socket address from a given host, this method first looks for a free
+    /// port in range 50051 to 50551 (where gRPC astroservice will live) and then returns
+    /// a SocketAddre of the given pair host:free_port.
+    pub fn build_server_address(host: &str) -> SocketAddr {
+        let port = {
+            (50051..50551)
+                .find(|port| port_is_available(host, *port))
+                .unwrap()
+        };
+        format!("{host}:{port}").parse().unwrap()
+    }
 
     pub fn print_device_table<T: AstroSerialDevice>(devices: &Vec<T>) {
         for d in devices {
