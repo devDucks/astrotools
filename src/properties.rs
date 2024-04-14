@@ -12,21 +12,21 @@ pub enum Permission {
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-struct Range<T> {
+pub struct Range<T> {
     min: T,
     max: T,
 }
 
 impl<T> Range<T> {
-    fn new(min: T, max: T) -> Self {
+    pub fn new(min: T, max: T) -> Self {
         Self { min, max }
     }
 
-    fn max(&self) -> &T {
+    pub fn max(&self) -> &T {
         &self.max
     }
 
-    fn min(&self) -> &T {
+    pub fn min(&self) -> &T {
         &self.min
     }
 }
