@@ -21,5 +21,5 @@ pub trait Lightspeed {
         &mut self,
         prop_name: &str,
         val: T,
-    ) -> Result<(), properties::PermissionError>;
+    ) -> Result<(), properties::PropertyError>;
 }
