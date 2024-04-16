@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(untagged)]
-enum PropValue {
+pub enum PropValue {
     Int(u32),
     Bool(bool),
     Str(String),
@@ -11,7 +11,7 @@ enum PropValue {
 
 #[derive(Debug, Serialize, Deserialize)]
 /// Struct to serialize an update property request coming from MQTT
-struct UpdatePropertyRequest {
+pub struct UpdatePropertyRequest {
     prop_name: String,
     value: PropValue,
 }
