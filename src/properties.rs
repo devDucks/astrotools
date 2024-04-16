@@ -12,8 +12,8 @@ pub enum PropValue {
 #[derive(Debug, Serialize, Deserialize)]
 /// Struct to serialize an update property request coming from MQTT
 pub struct UpdatePropertyRequest {
-    prop_name: String,
-    value: PropValue,
+    pub prop_name: String,
+    pub value: PropValue,
 }
 
 #[derive(Debug, PartialEq)]
