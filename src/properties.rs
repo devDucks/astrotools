@@ -18,7 +18,7 @@ pub struct UpdatePropertyRequest {
     pub value: PropValue,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize)]
 pub enum PropertyErrorType {
     CannotUpdateReadOnlyProp,
     InvalidValue,
