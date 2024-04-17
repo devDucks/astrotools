@@ -17,9 +17,10 @@ pub struct UpdatePropertyRequest {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum PropertyError {
+pub enum PropertyErrorType {
     CannotUpdateReadOnlyProp,
     InvalidValue,
+    ValueOutOfRange,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
@@ -50,10 +51,10 @@ impl<T> Range<T> {
 
 pub trait Prop<T> {
     fn value(&self) -> &T;
-    fn update_allowed(&self) -> Result<(), PropertyError>;
-    fn update(&mut self, value: T) -> Result<(), PropertyError>;
-    fn update_int(&mut self, value: T) -> Result<(), PropertyError>;
-    fn validate(&self, val: &T) -> Result<(), PropertyError>;
+    fn update_allowed(&self) -> Result<(), PropertyErrorType>;
+    fn update(&mut self, value: T) -> Result<(), PropertyErrorType>;
+    fn update_int(&mut self, value: T) -> Result<(), PropertyErrorType>;
+    fn validate(&self, val: &T) -> Result<(), PropertyErrorType>;
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
@@ -80,25 +81,25 @@ impl<T> Prop<T> for Property<T> {
         &self.value
     }
 
-    fn update_allowed(&self) -> Result<(), PropertyError> {
+    fn update_allowed(&self) -> Result<(), PropertyErrorType> {
         match self.permission {
-            Permission::ReadOnly => Err(PropertyError::CannotUpdateReadOnlyProp),
+            Permission::ReadOnly => Err(PropertyErrorType::CannotUpdateReadOnlyProp),
             _ => Ok(()),
         }
     }
 
-    fn update(&mut self, value: T) -> Result<(), PropertyError> {
+    fn update(&mut self, value: T) -> Result<(), PropertyErrorType> {
         self.update_allowed()?;
         self.value = value;
         Ok(())
     }
 
-    fn update_int(&mut self, value: T) -> Result<(), PropertyError> {
+    fn update_int(&mut self, value: T) -> Result<(), PropertyErrorType> {
         self.value = value;
         Ok(())
     }
 
-    fn validate(&self, _val: &T) -> Result<(), PropertyError> {
+    fn validate(&self, _val: &T) -> Result<(), PropertyErrorType> {
         Ok(())
     }
 }
@@ -108,25 +109,25 @@ impl<T> Prop<T> for RangeProperty<T> {
         &self.value
     }
 
-    fn update_allowed(&self) -> Result<(), PropertyError> {
+    fn update_allowed(&self) -> Result<(), PropertyErrorType> {
         match self.permission {
-            Permission::ReadOnly => Err(PropertyError::CannotUpdateReadOnlyProp),
+            Permission::ReadOnly => Err(PropertyErrorType::CannotUpdateReadOnlyProp),
             _ => Ok(()),
         }
     }
 
-    fn update(&mut self, value: T) -> Result<(), PropertyError> {
+    fn update(&mut self, value: T) -> Result<(), PropertyErrorType> {
         self.update_allowed()?;
         self.value = value;
         Ok(())
     }
 
-    fn update_int(&mut self, value: T) -> Result<(), PropertyError> {
+    fn update_int(&mut self, value: T) -> Result<(), PropertyErrorType> {
         self.value = value;
         Ok(())
     }
 
-    fn validate(&self, _val: &T) -> Result<(), PropertyError> {
+    fn validate(&self, _val: &T) -> Result<(), PropertyErrorType> {
         Ok(())
     }
 }
@@ -166,29 +167,29 @@ impl<T: std::clone::Clone + std::cmp::PartialEq> Prop<T> for ChoiceProperty<T> {
         &self.value
     }
 
-    fn update_allowed(&self) -> Result<(), PropertyError> {
+    fn update_allowed(&self) -> Result<(), PropertyErrorType> {
         match self.permission {
-            Permission::ReadOnly => Err(PropertyError::CannotUpdateReadOnlyProp),
+            Permission::ReadOnly => Err(PropertyErrorType::CannotUpdateReadOnlyProp),
             _ => Ok(()),
         }
     }
 
-    fn update(&mut self, value: T) -> Result<(), PropertyError> {
+    fn update(&mut self, value: T) -> Result<(), PropertyErrorType> {
         self.update_allowed()?;
         self.validate(&value)?;
         self.value = value;
         Ok(())
     }
 
-    fn update_int(&mut self, value: T) -> Result<(), PropertyError> {
+    fn update_int(&mut self, value: T) -> Result<(), PropertyErrorType> {
         self.validate(&value)?;
         self.value = value;
         Ok(())
     }
 
-    fn validate(&self, val: &T) -> Result<(), PropertyError> {
+    fn validate(&self, val: &T) -> Result<(), PropertyErrorType> {
         if !self.choices.contains(val) {
-            return Err(PropertyError::InvalidValue);
+            return Err(PropertyErrorType::InvalidValue);
         }
         Ok(())
     }
