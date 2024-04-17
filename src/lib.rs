@@ -6,6 +6,7 @@ pub mod filter_wheel;
 pub mod properties;
 pub mod types;
 
+#[derive(Debug)]
 pub enum LightspeedError {
     PropertyError(properties::PropertyErrorType),
     IoError(std::io::Error),

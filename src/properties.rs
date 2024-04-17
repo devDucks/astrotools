@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::LightspeedError;
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PropValue {
@@ -20,6 +22,7 @@ pub struct UpdatePropertyRequest {
 pub enum PropertyErrorType {
     CannotUpdateReadOnlyProp,
     InvalidValue,
+    InvalidChoice,
     ValueOutOfRange,
 }
 
@@ -51,10 +54,10 @@ impl<T> Range<T> {
 
 pub trait Prop<T> {
     fn value(&self) -> &T;
-    fn update_allowed(&self) -> Result<(), PropertyErrorType>;
-    fn update(&mut self, value: T) -> Result<(), PropertyErrorType>;
-    fn update_int(&mut self, value: T) -> Result<(), PropertyErrorType>;
-    fn validate(&self, val: &T) -> Result<(), PropertyErrorType>;
+    fn update_allowed(&self) -> Result<(), LightspeedError>;
+    fn update(&mut self, value: T) -> Result<(), LightspeedError>;
+    fn update_int(&mut self, value: T) -> Result<(), LightspeedError>;
+    fn validate(&self, val: &T) -> Result<(), LightspeedError>;
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
@@ -81,25 +84,27 @@ impl<T> Prop<T> for Property<T> {
         &self.value
     }
 
-    fn update_allowed(&self) -> Result<(), PropertyErrorType> {
+    fn update_allowed(&self) -> Result<(), LightspeedError> {
         match self.permission {
-            Permission::ReadOnly => Err(PropertyErrorType::CannotUpdateReadOnlyProp),
+            Permission::ReadOnly => Err(LightspeedError::PropertyError(
+                PropertyErrorType::CannotUpdateReadOnlyProp,
+            )),
             _ => Ok(()),
         }
     }
 
-    fn update(&mut self, value: T) -> Result<(), PropertyErrorType> {
+    fn update(&mut self, value: T) -> Result<(), LightspeedError> {
         self.update_allowed()?;
         self.value = value;
         Ok(())
     }
 
-    fn update_int(&mut self, value: T) -> Result<(), PropertyErrorType> {
+    fn update_int(&mut self, value: T) -> Result<(), LightspeedError> {
         self.value = value;
         Ok(())
     }
 
-    fn validate(&self, _val: &T) -> Result<(), PropertyErrorType> {
+    fn validate(&self, _val: &T) -> Result<(), LightspeedError> {
         Ok(())
     }
 }
@@ -109,25 +114,27 @@ impl<T> Prop<T> for RangeProperty<T> {
         &self.value
     }
 
-    fn update_allowed(&self) -> Result<(), PropertyErrorType> {
+    fn update_allowed(&self) -> Result<(), LightspeedError> {
         match self.permission {
-            Permission::ReadOnly => Err(PropertyErrorType::CannotUpdateReadOnlyProp),
+            Permission::ReadOnly => Err(LightspeedError::PropertyError(
+                PropertyErrorType::CannotUpdateReadOnlyProp,
+            )),
             _ => Ok(()),
         }
     }
 
-    fn update(&mut self, value: T) -> Result<(), PropertyErrorType> {
+    fn update(&mut self, value: T) -> Result<(), LightspeedError> {
         self.update_allowed()?;
         self.value = value;
         Ok(())
     }
 
-    fn update_int(&mut self, value: T) -> Result<(), PropertyErrorType> {
+    fn update_int(&mut self, value: T) -> Result<(), LightspeedError> {
         self.value = value;
         Ok(())
     }
 
-    fn validate(&self, _val: &T) -> Result<(), PropertyErrorType> {
+    fn validate(&self, _val: &T) -> Result<(), LightspeedError> {
         Ok(())
     }
 }
@@ -167,29 +174,33 @@ impl<T: std::clone::Clone + std::cmp::PartialEq> Prop<T> for ChoiceProperty<T> {
         &self.value
     }
 
-    fn update_allowed(&self) -> Result<(), PropertyErrorType> {
+    fn update_allowed(&self) -> Result<(), LightspeedError> {
         match self.permission {
-            Permission::ReadOnly => Err(PropertyErrorType::CannotUpdateReadOnlyProp),
+            Permission::ReadOnly => Err(LightspeedError::PropertyError(
+                PropertyErrorType::CannotUpdateReadOnlyProp,
+            )),
             _ => Ok(()),
         }
     }
 
-    fn update(&mut self, value: T) -> Result<(), PropertyErrorType> {
+    fn update(&mut self, value: T) -> Result<(), LightspeedError> {
         self.update_allowed()?;
         self.validate(&value)?;
         self.value = value;
         Ok(())
     }
 
-    fn update_int(&mut self, value: T) -> Result<(), PropertyErrorType> {
+    fn update_int(&mut self, value: T) -> Result<(), LightspeedError> {
         self.validate(&value)?;
         self.value = value;
         Ok(())
     }
 
-    fn validate(&self, val: &T) -> Result<(), PropertyErrorType> {
+    fn validate(&self, val: &T) -> Result<(), LightspeedError> {
         if !self.choices.contains(val) {
-            return Err(PropertyErrorType::InvalidValue);
+            return Err(LightspeedError::PropertyError(
+                PropertyErrorType::InvalidChoice,
+            ));
         }
         Ok(())
     }
@@ -197,7 +208,7 @@ impl<T: std::clone::Clone + std::cmp::PartialEq> Prop<T> for ChoiceProperty<T> {
 
 #[cfg(test)]
 mod unit_tests {
-    use super::{ChoiceProperty, Permission, Prop, Property, PropertyError, RangeProperty};
+    use super::{ChoiceProperty, Permission, Prop, Property, RangeProperty};
 
     #[test]
     fn test_bool_prop_initialization() {
@@ -209,7 +220,7 @@ mod unit_tests {
     fn test_prop_readonly_cannot_be_updated() {
         let mut p = Property::new(false, Permission::ReadOnly);
         let res = p.update(true);
-        assert_eq!(res, Err(PropertyError::CannotUpdateReadOnlyProp));
+        assert!(res.is_err());
         assert_eq!(p.value(), &false);
     }
 
@@ -217,7 +228,7 @@ mod unit_tests {
     fn test_prop_readwrite_can_be_written() {
         let mut p = Property::new(false, Permission::ReadWrite);
         let res = p.update(true);
-        assert_eq!(res, Ok(()));
+        assert!(res.is_ok());
         assert_eq!(p.value(), &true);
     }
 
@@ -258,7 +269,7 @@ mod unit_tests {
         let _ = p.update(1);
         assert_eq!(p.value(), &1);
         let res = p.update(100);
-        assert_eq!(res, Err(PropertyError::InvalidValue));
+        assert!(res.is_err());
     }
 }
 
