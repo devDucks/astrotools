@@ -40,12 +40,16 @@ pub trait Lightspeed {
     /// This method is used to synchronize the device state with the internal state of the driver.
     fn sync_state(&mut self);
 
-    /// Method to be used when receving requests from clients to update properties.
+    /// Method to be used when receiving requests from clients to update properties.
     ///
-    /// The internal logic would be a match on the prop_name that will then call prop.update_int(...),
-    /// a method to update the value on the device itself, or both of them depending on the type
-    /// of device.
-    fn update_property<T>(&mut self, prop_name: &str, val: T) -> Result<(), LightspeedError>;
+    /// Implementors should match on `prop_name` and convert `val` to the expected type via
+    /// `TryFrom<PropValue>`. Unknown property names should return
+    /// `LightspeedError::PropertyError(PropertyErrorType::InvalidValue)`.
+    fn update_property(
+        &mut self,
+        prop_name: &str,
+        val: properties::PropValue,
+    ) -> Result<(), LightspeedError>;
 }
 
 #[cfg(test)]

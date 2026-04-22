@@ -8,7 +8,34 @@ pub enum PropValue {
     Int(u32),
     Bool(bool),
     Str(String),
-    Float(f32),
+    Float(f64),
+}
+
+impl TryFrom<PropValue> for f64 {
+    type Error = crate::LightspeedError;
+
+    fn try_from(val: PropValue) -> Result<Self, Self::Error> {
+        match val {
+            PropValue::Float(f) => Ok(f),
+            PropValue::Int(i) => Ok(i as f64),
+            _ => Err(crate::LightspeedError::PropertyError(
+                PropertyErrorType::InvalidValue,
+            )),
+        }
+    }
+}
+
+impl TryFrom<PropValue> for u32 {
+    type Error = crate::LightspeedError;
+
+    fn try_from(val: PropValue) -> Result<Self, Self::Error> {
+        match val {
+            PropValue::Int(i) => Ok(i),
+            _ => Err(crate::LightspeedError::PropertyError(
+                PropertyErrorType::InvalidValue,
+            )),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
