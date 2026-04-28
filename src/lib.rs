@@ -2,9 +2,11 @@
 //!
 //! Astrotools provides traits and utils that can be used to implement
 //! multiplatform drivers to drive astronomical equipment.
+pub mod device;
 pub mod filter_wheel;
+pub mod imaging;
 pub mod properties;
-pub mod types;
+pub mod runner;
 
 use serde::{Serialize, Serializer};
 
@@ -22,6 +24,9 @@ pub enum LightspeedError {
     #[serde(serialize_with = "io_serialize")]
     IoError(std::io::Error),
     DeviceConnectionError,
+    UnknownCommand,
+    QueueFull,
+    ParseError,
 }
 
 impl From<properties::PropertyErrorType> for LightspeedError {
