@@ -7,8 +7,11 @@ pub mod filter_wheel;
 pub mod imaging;
 pub mod properties;
 pub mod runner;
+mod serial;
 
 use serde::{Serialize, Serializer};
+
+pub use crate::serial::find_serial_devices;
 
 fn io_serialize<S>(err: &std::io::Error, serializer: S) -> Result<S::Ok, S::Error>
 where
