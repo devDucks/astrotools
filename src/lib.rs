@@ -1,17 +1,37 @@
 //! The basic building blocks you need to build your next astrophotography suite.
 //!
 //! Astrotools provides traits and utils that can be used to implement
-//! multiplatform drivers to drive astronomical equipment.
-pub mod device;
-pub mod filter_wheel;
-pub mod imaging;
+//! multiplatform drivers to drive astronomical equipment, plus the wire-format
+//! types that the server side of the lightspeed protocol consumes.
+
+// Always available (wire feature is enabled by both `driver` and `server`)
 pub mod properties;
+
+#[cfg(feature = "wire")]
+pub mod protocol;
+#[cfg(feature = "wire")]
+pub mod presence;
+#[cfg(feature = "wire")]
+pub mod frame;
+#[cfg(feature = "wire")]
+pub mod topics;
+
+// Driver-only modules
+#[cfg(feature = "driver")]
+pub mod device;
+#[cfg(feature = "driver")]
+pub mod filter_wheel;
+#[cfg(feature = "driver")]
+pub mod imaging;
+#[cfg(feature = "driver")]
 pub mod runner;
+#[cfg(feature = "driver")]
 mod serial;
 
-use serde::{Serialize, Serializer};
-
+#[cfg(feature = "driver")]
 pub use crate::serial::find_serial_devices;
+
+use serde::{Serialize, Serializer};
 
 fn io_serialize<S>(err: &std::io::Error, serializer: S) -> Result<S::Ok, S::Error>
 where
@@ -44,15 +64,9 @@ impl From<std::io::Error> for LightspeedError {
     }
 }
 
+#[cfg(feature = "driver")]
 pub trait Lightspeed {
-    /// This method is used to synchronize the device state with the internal state of the driver.
     fn sync_state(&mut self);
-
-    /// Method to be used when receiving requests from clients to update properties.
-    ///
-    /// Implementors should match on `prop_name` and convert `val` to the expected type via
-    /// `TryFrom<PropValue>`. Unknown property names should return
-    /// `LightspeedError::PropertyError(PropertyErrorType::InvalidValue)`.
     fn update_property(
         &mut self,
         prop_name: &str,
@@ -64,6 +78,7 @@ pub trait Lightspeed {
 mod tests {
     use crate::LightspeedError;
     use std::io::{Error, ErrorKind};
+
     #[test]
     fn test_serialize_lightspeed_error() {
         let custom_error_1 = Error::new(ErrorKind::Other, "oh no!");

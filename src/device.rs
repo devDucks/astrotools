@@ -8,6 +8,9 @@ pub enum DeviceType {
     Focuser,
     FilterWheel,
     PowerBox,
+    Dome,     // NEW in 0.12
+    Weather,  // NEW in 0.12
+    AuxBox,   // NEW in 0.12 — generic catch-all
 }
 
 /// Unified lifecycle trait for all Lightspeed-compliant devices.
